@@ -93,9 +93,7 @@ jobs:
               --password ${{ env.NEXUS_HELM_REPO_PASSWORD }}
             helm repo update
         - name: Push chart to Nexus
-          run: |
-            curl -v -u ${{ env.NEXUS_HELM_REPO_USER }}:${{ env.NEXUS_HELM_REPO_PASSWORD }} \
-            --upload-file sausage-store-${{ env.CHART_VERSION }}.tgz ${{ env.NEXUS_HELM_REPO }}
+          run: helm cm-push sausage-store-${{ env.CHART_VERSION }}.tgz nexus
 
   # Деплоим приложения в кластер Kubernetes с помощью helm-чарт
   deploy_helm_chart_to_kubernetes:
@@ -119,6 +117,7 @@ jobs:
           run: |
             envsubst < ./sausage-store-chart/values.yaml > ./values-resolved.yaml
             helm upgrade --install sausage-store nexus/sausage-store \
+              --version ${{ env.CHART_VERSION }} \
               --namespace ${{ env.SAUSAGE_STORE_NAMESPACE }} \
               --values ./values-resolved.yaml \
               --kubeconfig ./kubeconfig
